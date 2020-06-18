@@ -3,7 +3,6 @@ package justwatch
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -13,6 +12,7 @@ const (
 
 	justWatchURL   string = "https://apis.justwatch.com/content"
 	defaultCountry string = "ES"
+	defaultLocale  string = "es_ES"
 )
 
 // Client is the client for JustWatch API
@@ -58,8 +58,10 @@ func SetURL(url string) ClientOptionFunc {
 // NewClient creates a new JustWatch client
 func NewClient(opts ...ClientOptionFunc) (*Client, error) {
 	c := &Client{
-		Logger: &defaultLogger{},
-		URL:    justWatchURL,
+		Client:  &http.Client{},
+		Logger:  &defaultLogger{},
+		URL:     justWatchURL,
+		Country: defaultCountry,
 	}
 	for _, opt := range opts {
 		if err := opt(c); err != nil {
@@ -67,14 +69,15 @@ func NewClient(opts ...ClientOptionFunc) (*Client, error) {
 		}
 	}
 
-	const defaultLocale = "es_ES"
-	resp, err := c.doReq(http.MethodGet, "locales/state", nil)
-	if err != nil {
-		return nil, err
-	}
-	response, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if locale, err := c.getLocale(); err != nil {
+		c.Debugw(
+			"unable to get locale for country. default value will be used",
+			"country", c.Country,
+			"default_locale", defaultLocale,
+		)
+		c.locale = defaultLocale
+	} else {
+		c.locale = locale
 	}
 	return c, nil
 }
