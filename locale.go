@@ -41,7 +41,7 @@ func (c *Client) getLocale() (string, error) {
 		return "", err
 	}
 	var locales []*localeResponse
-	err = json.Unmarshal(response, locales)
+	err = json.Unmarshal(response, &locales)
 	if err != nil {
 		return "", err
 	}

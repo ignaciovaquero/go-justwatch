@@ -1,7 +1,10 @@
 package justwatch
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -40,7 +43,81 @@ type SearchQuery struct {
 	PageSize           int               `json:"page_size,omitempty"`
 }
 
-func (c *Client) searchItem(kind string) {
+// OfferURLs defines a set of urls for the provider
+type OfferURLs struct {
+	StandardWeb string `json:"standard_web"`
+}
+
+// Offer defines an offer in JustWatch
+type Offer struct {
+	MonetizationType string     `json:"monetization_type"`
+	ProviderID       int        `json:"provider_id"`
+	Currency         string     `json:"currency"`
+	URLs             *OfferURLs `json:"urls"`
+	PresentationType string     `json:"presentation_type"`
+}
+
+// Item is used for returning a response from a search
+type Item struct {
+	ID         int      `json:"id"`
+	JWEntityID string   `json:"jw_entity_id"`
+	Title      string   `json:"title"`
+	FullPath   string   `json:"full_path"`
+	Poster     string   `json:"poster"`
+	ObjectType string   `json:"object_type"`
+	Offers     []*Offer `json:"offers"`
+}
+
+// SearchProvider is a response from a provider in a search API call
+type SearchProvider struct {
+	Total      int     `json:"total"`
+	ProviderID int     `json:"provider_id"`
+	Items      []*Item `json:"items"`
+}
+
+// SearchDay corresponds to a day in a response from the search API call
+type SearchDay struct {
+	Date      string            `json:"date"`
+	Providers []*SearchProvider `json:"providers"`
+}
+
+// SearchResponse wraps a response from the search API call
+type SearchResponse struct {
+	SkipCount int          `json:"skip_count"`
+	Days      []*SearchDay `json:"days"`
+	Page      int          `json:"page"`
+	PageSize  int          `json:"page_size"`
+}
+
+func (c *Client) search(kind string, query *SearchQuery) (*SearchResponse, error) {
+	var resp SearchResponse
 	endpoint := fmt.Sprintf("titles/%s/%s", c.locale, kind)
-	c.doReq(http.MethodPost, endpoint, body)
+	body, err := json.Marshal(query)
+	if err != nil {
+		return nil, err
+	}
+	response, err := c.doReq(http.MethodPost, endpoint, bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	responseBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(responseBody, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// SearchNew searches for new items. It can receive a SearchQuery in order to
+// filter the results to be shown.
+func (c *Client) SearchNew(query *SearchQuery) (*SearchResponse, error) {
+	return c.search("new", query)
+}
+
+// SearchPopular searches for popular items. It can receive a SearchQuery in order to
+// filter the results to be shown.
+func (c *Client) SearchPopular(query *SearchQuery) (*SearchResponse, error) {
+	return c.search("popular", query)
 }
