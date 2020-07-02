@@ -89,6 +89,10 @@ type SearchResponse struct {
 	PageSize  int          `json:"page_size"`
 }
 
+func (i *Item) String() string {
+	return fmt.Sprintf("Item of type %s: %s", i.ObjectType, i.Title)
+}
+
 func (c *Client) search(kind string, query *SearchQuery) (*SearchResponse, error) {
 	var resp SearchResponse
 	endpoint := fmt.Sprintf("titles/%s/%s", c.locale, kind)
