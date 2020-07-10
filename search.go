@@ -8,18 +8,6 @@ import (
 	"net/http"
 )
 
-// ScoringFilter contains an integer value that allows to set a scoring filter
-type ScoringFilter struct {
-	MinScoringValue int `json:"min_scoring_value"`
-}
-
-// ScoringFilterType is a struct that gathers scoring filters from IMDB and
-// Rotten Tomatoes
-type ScoringFilterType struct {
-	TomatoMeter ScoringFilter `json:"tomato:meter,omitempty"`
-	IMDB        ScoringFilter `json:"imdb:score,omitempty"`
-}
-
 // SearchQuery is used for searching items in JustWatch. It contains a full
 // list of filters.
 type SearchQuery struct {
@@ -41,20 +29,6 @@ type SearchQuery struct {
 	ContentTypes       []string          `json:"content_types,omitempty"`
 	Page               int               `json:"page,omitempty"`
 	PageSize           int               `json:"page_size,omitempty"`
-}
-
-// OfferURLs defines a set of urls for the provider
-type OfferURLs struct {
-	StandardWeb string `json:"standard_web"`
-}
-
-// Offer defines an offer in JustWatch
-type Offer struct {
-	MonetizationType string     `json:"monetization_type"`
-	ProviderID       int        `json:"provider_id"`
-	Currency         string     `json:"currency"`
-	URLs             *OfferURLs `json:"urls"`
-	PresentationType string     `json:"presentation_type"`
 }
 
 // Item is used for returning a response from a search
