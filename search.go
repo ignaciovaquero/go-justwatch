@@ -79,6 +79,7 @@ func (c *Client) search(kind string, query *SearchQuery) (*SearchResponse, error
 		return nil, err
 	}
 	responseBody, err := ioutil.ReadAll(response.Body)
+	defer response.Body.Close()
 	if err != nil {
 		return nil, err
 	}
