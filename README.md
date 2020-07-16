@@ -1,11 +1,6 @@
 # Unofficial JustWatch API
 Unofficial Golang library for JustWatch API
 
-# Unofficial JustWatch API
-[![Build Status](https://travis-ci.com/dawoudt/JustWatchAPI.svg?branch=master)](https://travis-ci.com/dawoudt/JustWatchAPI)
-
-JustWatch.com Golang API
-
 ##  Disclaimer
 This is not the official JustWatch API. JustWatch doesn't offer an open API and doesn't plan to do this in the future.
 
@@ -16,3 +11,10 @@ JustWatch is also hiring: https://www.justwatch.com/us/talent and has some inter
 
 - [JustWatch on Github](https://github.com/justwatchcom)
 - [GoPass Password Manager](https://github.com/gopasspw/gopass)
+
+
+## ToDo
+
+- Improve testing
+- Cinema API
+- Search by title
