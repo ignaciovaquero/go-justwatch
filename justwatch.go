@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 const (
@@ -13,6 +14,7 @@ const (
 	justWatchURL   string = "https://apis.justwatch.com/content"
 	defaultCountry string = "ES"
 	defaultLocale  string = "es_ES"
+	defaultTimeout int    = 10
 )
 
 // Client is the client for JustWatch API
@@ -22,6 +24,7 @@ type Client struct {
 	URL     string
 	Country string
 	locale  string
+	timeout int
 }
 
 // ClientOptionFunc is a function that configures a JustWatch client.
@@ -55,18 +58,38 @@ func SetURL(url string) ClientOptionFunc {
 	}
 }
 
+// SetCountry overrides the default JustWatch API country
+func SetCountry(countryCode string) ClientOptionFunc {
+	return func(c *Client) error {
+		c.Country = countryCode
+		return nil
+	}
+}
+
+// SetTimeout overrides the default JustWatch API Timeout
+func SetTimeout(timeout int) ClientOptionFunc {
+	return func(c *Client) error {
+		c.timeout = timeout
+		return nil
+	}
+}
+
 // NewClient creates a new JustWatch client
 func NewClient(opts ...ClientOptionFunc) (*Client, error) {
 	c := &Client{
-		Client:  &http.Client{},
 		Logger:  &defaultLogger{},
 		URL:     justWatchURL,
 		Country: defaultCountry,
+		timeout: defaultTimeout,
 	}
 	for _, opt := range opts {
 		if err := opt(c); err != nil {
 			return nil, err
 		}
+	}
+
+	c.Client = &http.Client{
+		Timeout: time.Duration(c.timeout) * time.Second,
 	}
 
 	if locale, err := c.getLocale(); err != nil {
